@@ -37,3 +37,27 @@ def expand_dispatch_date(df):
     df = df.drop(columns=["dispatch_date"])
 
     return df
+
+def age_range_to_midpoint(age_range):
+    """Convert a string age range to its midpoint as a number.
+    
+    Parameters:
+        age_range: A string like "25 to 29", or NaN if missing
+
+    Returns:
+        The midpoint as a float, 100 for "Over 100",
+        or NaN if it is a missing value.
+    """
+    if pd.isna(age_range):
+        return np.nan
+
+    parts = age_range.split(" ")
+    lower = parts[0]
+    upper = parts[-1]
+
+    if lower == "Over": # handles the "Over 100" edge case
+        return 100
+    
+    midpoint = (int(lower) + int(upper)) / 2
+
+    return midpoint
