@@ -61,3 +61,33 @@ def age_range_to_midpoint(age_range):
     midpoint = (int(lower) + int(upper)) / 2
 
     return midpoint
+
+def reorder_columns(df):
+    """Reorder dataset columns to a more readable order.
+
+    Parameters:
+        df: Transformed DataFrame with new columns.
+
+    Returns:
+        A nicely ordered DataFrame.
+    """
+
+    df = df.copy()
+
+    new_order = [
+    "incident_number",
+    "patient_number",
+    "date",
+    "year",
+    "month",
+    "day_of_week",
+    "hour",
+    "age",
+    "age_midpoint",
+    "ward",
+    "naloxone_administrations"
+    ]
+
+    df = df[new_order]
+
+    return df
