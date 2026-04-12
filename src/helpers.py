@@ -6,6 +6,8 @@ for data cleaning, analysis, and visualization.
 """
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 def expand_dispatch_date(df):
     """Parse dispatch_date and expand it into separate temporal columns.
@@ -115,3 +117,45 @@ def merge_ward_data(df, wards_df):
     by_ward["incidents_per_1000"] = (by_ward["incidents"] / by_ward["population"]) * 1000
 
     return by_ward
+
+def plot_incidents_by_year(df):
+    """Plot total incidents and naloxone administrations by year.
+
+    Parameters:
+        df: The cleaned naloxone DataFrame.
+    """
+    
+    # preparing the data to plot
+    by_year = df.groupby("year")
+    administrations_year = by_year["naloxone_administrations"].sum().loc[2008:2025]
+    incidents_year = by_year["incident_number"].nunique().loc[2008:2025]
+
+    # plotting
+    fig, ax = plt.subplots(figsize=(12, 8))
+
+    # plot both lines
+    ax.plot(administrations_year.index, administrations_year, color="red", label="Administrations")
+    ax.plot(incidents_year.index, incidents_year, color="orange", label="Incidents")
+
+    # fill both areas
+    ax.fill_between(incidents_year.index, incidents_year, color="orange", alpha=0.3)
+    ax.fill_between(administrations_year.index, incidents_year, administrations_year, color="red", alpha=0.3)
+
+    # text + arrow annotation about fentanyl
+    ax.annotate("Fentanyl enters the market",
+                xy=(2015, administrations_year[2015]),
+                xytext=(2015 - 5, administrations_year[2015] + 1000),
+                arrowprops=dict(arrowstyle="fancy", color="black"),
+                fontsize=13)
+
+
+    ax.set_xticks([2008, 2010, 2012, 2014, 2016, 2018, 2020, 2022, 2024])
+
+    # labeling the plot
+    ax.set_title("Number of Incidents and Administrations by Year", fontsize=16, fontweight="bold")
+    ax.set_xlabel("Year", fontsize=13, fontweight="bold")
+    ax.grid(axis="y", alpha=0.5)
+
+    # displaying the chart
+    ax.legend()
+    plt.show()
