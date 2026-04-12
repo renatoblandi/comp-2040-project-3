@@ -199,3 +199,46 @@ def plot_temporal_patterns(df):
 
     # displaying the figure
     plt.show()
+
+def plot_ward_incidents(df, wards_df):
+    """Plot total incidents and incidents per 1,000 residents by ward.
+
+    Parameters:
+        df: The cleaned naloxone DataFrame.
+        wards_df: The ward demographics DataFrame. 
+    """
+
+    # preparing the data
+    by_ward = merge_ward_data(df, wards_df)
+
+    # creating new column to hold incidents per 1000 residents
+    by_ward["incidents_per_1000"] = (by_ward["incidents"] / by_ward["population"]) * 1000
+
+    sorted_df = by_ward.sort_values("incidents")
+    sorted_normalized_df = by_ward.sort_values("incidents_per_1000")
+
+    # plotting
+    fig, ax = plt.subplots(1, 2, figsize=(16, 6))
+
+    # plotting left barh chart (not normalized - raw total incidents)
+    ax[0].barh(sorted_df["ward"], sorted_df["incidents"], color="orange", edgecolor="black")
+
+    # labeling left barh
+    ax[0].set_title("Incidents by Ward (Total)", fontsize=16, fontweight="bold")
+    ax[0].set_xlabel("Number of Incidents", fontsize=13, fontweight="bold")
+    ax[0].set_ylabel("Ward", fontsize=13, fontweight="bold")
+    ax[0].grid(axis="x", alpha=0.5)
+
+    # plotting right barh (normalized by incidents per 1000 residents)
+    ax[1].barh(sorted_normalized_df["ward"], sorted_normalized_df["incidents_per_1000"],
+            color="orange", edgecolor="black")
+
+    # labeling right barh
+    ax[1].set_title("Incidents by Ward (per 1,000 residents)", fontsize=16, fontweight="bold")
+    ax[1].set_xlabel("Incidents per 1,000 Residents", fontsize=13, fontweight="bold")
+    ax[1].set_ylabel("Ward", fontsize=13, fontweight="bold")
+    ax[1].grid(axis="x", alpha=0.5)
+
+    # displaying the figure
+    plt.tight_layout()
+    plt.show()
