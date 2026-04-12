@@ -159,3 +159,43 @@ def plot_incidents_by_year(df):
     # displaying the chart
     ax.legend()
     plt.show()
+
+def plot_temporal_patterns(df):
+    """Plot incidents by day of week and by hour of day.
+
+    Parameters:
+        df: The cleaned naloxone DataFrame.
+    """
+    
+    # preparing the data
+    incidents_dow = df.groupby("day_of_week")["incident_number"].nunique()
+    incidents_hour = df.groupby("hour")["incident_number"].nunique()
+
+    # plotting
+    fig, ax = plt.subplots(1, 2, figsize=(14, 6))
+
+    # plotting left bar chart (incidents by day of week)
+    ax[0].bar(incidents_dow.index, incidents_dow, color="orange", edgecolor="black")
+    ax[0].set_xticks(np.arange(0, 7))
+
+    # labeling left bar chart
+    ax[0].set_xticklabels(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"])
+    ax[0].set_title("Incidents by Day of Week", fontsize=16, fontweight="bold")
+    ax[0].set_xlabel("Day of Week", fontsize=13, fontweight="bold")
+    ax[0].set_ylabel("Number of Incidents", fontsize=13, fontweight="bold")
+
+    # plotting right bar chart (incidents by hour)
+    ax[1].bar(incidents_hour.index, incidents_hour, color="orange", edgecolor="black", width=0.8)
+    ax[1].set_xticks(np.arange(0, 24, 2))
+
+    # labeling right bar chart
+    ax[1].set_title("Incidents by Hour", fontsize=16, fontweight="bold")
+    ax[1].set_xlabel("Hour", fontsize=13, fontweight="bold")
+    ax[1].set_ylabel("Number of Incidents", fontsize=13, fontweight="bold")
+
+    # setting the grid for both charts
+    ax[0].grid(axis="y", alpha=0.5)
+    ax[1].grid(axis="y", alpha=0.5)
+
+    # displaying the figure
+    plt.show()
