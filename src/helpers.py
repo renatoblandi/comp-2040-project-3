@@ -93,3 +93,25 @@ def reorder_columns(df):
     df = df[new_order]
 
     return df
+
+def merge_ward_data(df, wards_df):
+    """Aggregate incidents by ward and merge with demographic data.
+
+    Parameters:
+        df: The cleaned naloxone DataFrame.
+        wards_df: The ward demographics DataFrame.
+
+    Returns:
+        A DataFrame with one row per ward, containing total incidents,
+        population, median household income, and incidents per 1,000 residents.
+    """
+
+    # reset index to turn groupby into a regular df
+    by_ward = df.groupby("ward")["incident_number"].nunique().reset_index()
+    by_ward.columns = ["ward", "incidents"] # renaming incident_number to incidents
+    by_ward = by_ward.merge(wards_df, on="ward") # merging supplementary dataset on `ward` column
+
+    # creating new column to hold incidents per 1000 residents
+    by_ward["incidents_per_1000"] = (by_ward["incidents"] / by_ward["population"]) * 1000
+
+    return by_ward
