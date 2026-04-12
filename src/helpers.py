@@ -242,3 +242,39 @@ def plot_ward_incidents(df, wards_df):
     # displaying the figure
     plt.tight_layout()
     plt.show()
+
+def plot_income_scatter(df, wards_df):
+    """Plot median household income vs incidents per 1,000 residents by ward.
+
+    Parameters:
+        df: The cleaned naloxone DataFrame.
+        wards_df: The ward demographics DataFrame.
+    """
+
+    # preparing the data
+    by_ward = merge_ward_data(df, wards_df)
+
+    # creating new column to hold incidents per 1000 residents
+    by_ward["incidents_per_1000"] = (by_ward["incidents"] / by_ward["population"]) * 1000
+
+    # plotting
+    fig, ax = plt.subplots(figsize=(10, 7))
+
+    ax.scatter(by_ward["median_household_income"], by_ward["incidents_per_1000"],
+            color="steelblue", edgecolor="black", s=120, alpha=0.8)
+
+    # annotating main wards    
+    main_wards = ["Point Douglas", "Mynarski", "Daniel McIntyre", "Fort Rouge - East Fort Garry"]
+    main_wards_df = by_ward[by_ward["ward"].isin(main_wards)]
+    for _, row in main_wards_df.iterrows():
+        ax.annotate(row["ward"], (row["median_household_income"], row["incidents_per_1000"]),
+                    fontsize=8, xytext=(5, 4), textcoords="offset points")
+
+    # labeling the plot
+    ax.set_title("Median Household Income vs Incidents per 1,000 Residents", fontsize=16, fontweight="bold")
+    ax.set_xlabel("Median Household Income (2020)", fontsize=13, fontweight="bold")
+    ax.set_ylabel("Incidents per 1,000 Residents", fontsize=13, fontweight="bold")
+
+    # displaying the chart
+    ax.grid(alpha=0.4)
+    plt.show()
