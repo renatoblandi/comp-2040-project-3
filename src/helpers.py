@@ -278,3 +278,37 @@ def plot_income_scatter(df, wards_df):
     # displaying the chart
     ax.grid(alpha=0.4)
     plt.show()
+
+def plot_multiple_dose_heatmap(df):
+    """Plot multiple dose rate by gender and age group as a heatmap.
+
+    Parameters:
+        df: The cleaned naloxone DataFrame.
+    """
+
+    # preparing the data
+
+    # separating age range in bigger sections (age_group)
+    bins = [0, 19, 29, 39, 49, 59, 200]
+    labels = ["Under 20", "20s", "30s", "40s", "50s", "60+"]
+    df["age_group"] = pd.cut(df["age_midpoint"], bins=bins, labels=labels)
+
+    pivot = df.groupby(["gender", "age_group"], observed="True")["is_multiple_dose"].mean() * 100
+    pivot = pivot.unstack()
+
+    # plotting
+    fig, ax = plt.subplots(figsize=(10, 4))
+
+    # creating a heatmap for % of multiple dose by gender (y-axis) and age_group (x_axis)
+    # showing the percentages for each point (square)
+    sns.heatmap(pivot, annot=True, fmt=".1f", cmap="YlOrRd", linewidths=0.5,
+                cbar_kws={"label": "% Multiple Dose"}, ax=ax)
+
+    # labeling the plot
+    ax.set_title("Multiple Dose Rate (%) by Gender and Age Group", fontsize=14, fontweight="bold")
+    ax.set_xlabel("Age Group", fontsize=11)
+    ax.set_ylabel("Gender", fontsize=11)
+
+    # displaying the chart
+    plt.tight_layout()
+    plt.show()
