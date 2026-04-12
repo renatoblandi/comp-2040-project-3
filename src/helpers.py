@@ -84,8 +84,10 @@ def reorder_columns(df):
     "hour",
     "age",
     "age_midpoint",
+    "gender",
     "ward",
-    "naloxone_administrations"
+    "naloxone_administrations",
+    "is_multiple_dose"
     ]
 
     df = df[new_order]
