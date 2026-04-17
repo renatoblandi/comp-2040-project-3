@@ -408,3 +408,34 @@ def prepare_data_for_train(df):
     X_test_final  = pd.concat([X_test[num_cols], test_enc], axis=1)
 
     return X_train_final, X_test_final, y_train, y_test
+
+def train_evaluate_dt(X_train, X_test, y_train, y_test):
+    """
+    Trains a Decision Tree classifier and prints evaluation metrics.
+
+    Parameters:
+    X_train, X_test : pd.DataFrame
+        Feature matrices for training and testing.
+    y_train, y_test : pd.Series
+        Target labels (is_multiple_dose) for each split.
+
+    Returns:
+    dt : DecisionTreeClassifier
+        The trained model.
+    """
+    
+    dt = DecisionTreeClassifier(
+    class_weight="balanced",
+    max_depth=10,
+    random_state=42
+)
+
+    dt.fit(X_train, y_train)
+    y_pred = dt.predict(X_test)
+
+    print("Accuracy:", round(accuracy_score(y_test, y_pred), 4))
+    print("F1:", round(f1_score(y_test, y_pred), 4))
+    print("Recall:", round(recall_score(y_test, y_pred), 4))
+    print("Precision:", round(precision_score(y_test, y_pred), 4))
+
+    return dt
