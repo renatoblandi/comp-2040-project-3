@@ -142,7 +142,7 @@ def plot_incidents_by_year(df):
     ax.fill_between(administrations_year.index, incidents_year, administrations_year, color="red", alpha=0.3)
 
     # text + arrow annotation about fentanyl
-    ax.annotate("Fentanyl enters the market",
+    ax.annotate("Fentanyl crisis start",
                 xy=(2015, administrations_year[2015]),
                 xytext=(2015 - 5, administrations_year[2015] + 1000),
                 arrowprops=dict(arrowstyle="fancy", color="black"),
