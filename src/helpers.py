@@ -171,6 +171,9 @@ def plot_temporal_patterns(df):
     incidents_dow = df.groupby("day_of_week")["incident_number"].nunique()
     incidents_hour = df.groupby("hour")["incident_number"].nunique()
 
+    hours_reordered = list(range(6, 24)) + list(range(0, 6))
+    incidents_hour = incidents_hour.reindex(hours_reordered)
+
     # plotting
     fig, ax = plt.subplots(1, 2, figsize=(14, 6))
 
@@ -185,10 +188,11 @@ def plot_temporal_patterns(df):
     ax[0].set_ylabel("Number of Incidents", fontsize=13, fontweight="bold")
 
     # plotting right bar chart (incidents by hour)
-    ax[1].bar(incidents_hour.index, incidents_hour, color="orange", edgecolor="black", width=0.8)
-    ax[1].set_xticks(np.arange(0, 24, 2))
+    ax[1].bar(range(24), incidents_hour, color="orange", edgecolor="black", width=0.8)
+    ax[1].set_xticks(range(0, 24, 2))
 
     # labeling right bar chart
+    ax[1].set_xticklabels([f"{h}h" for h in hours_reordered[::2]])
     ax[1].set_title("Incidents by Hour", fontsize=16, fontweight="bold")
     ax[1].set_xlabel("Hour", fontsize=13, fontweight="bold")
     ax[1].set_ylabel("Number of Incidents", fontsize=13, fontweight="bold")
