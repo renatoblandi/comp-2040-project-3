@@ -8,6 +8,10 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, recall_score, f1_score, precision_score
+from sklearn.preprocessing import OneHotEncoder
 
 def expand_dispatch_date(df):
     """Parse dispatch_date and expand it into separate temporal columns.
@@ -336,3 +340,71 @@ def plot_multiple_dose_heatmap(df):
     # displaying the chart
     plt.tight_layout()
     plt.show()
+
+def prepare_data_for_train(df):
+    """
+    Selects features, handles missing values, and splits/encodes the data for training.
+
+    Categorical columns (age, gender, ward) are one-hot encoded using a encoder
+    fitted only on the training set to avoid data leakage.
+
+    Parameters:
+    df : pd.DataFrame
+        The cleaned naloxone dataset. Must contain: year, month, day_of_week,
+        hour, age, gender, ward, is_multiple_dose.
+
+    Returns:
+    X_train, X_test : pd.DataFrame
+        Feature matrices for training (80%) and testing (20%).
+    y_train, y_test : pd.Series
+        Target labels (is_multiple_dose) for each split.
+    """
+
+    df = df.copy() # don't modify the original
+
+    # select the features
+    selected_columns = [
+    "year",
+    "month",
+    "day_of_week",
+    "hour",
+    "age",
+    "gender",
+    "ward",
+    "is_multiple_dose"
+    ]
+
+    df = df[selected_columns]
+
+    # substitute missing values
+    df = df.fillna("Unknown")
+
+    # split into features / target
+    X = df.drop(columns=["is_multiple_dose"]) # features
+    y = df["is_multiple_dose"] # target
+
+    # split into train / test
+    X_train, X_test, y_train, y_test = train_test_split(X, y,
+        test_size=0.2, stratify=y, random_state=42
+    )
+
+    # encoding
+    cat_cols = ["age", "gender", "ward"]
+
+    oh = OneHotEncoder(handle_unknown="ignore", sparse_output=False)
+    oh.fit(X_train[cat_cols])
+
+    train_enc = oh.transform(X_train[cat_cols])
+    test_enc  = oh.transform(X_test[cat_cols])
+
+    feature_names = oh.get_feature_names_out(cat_cols)
+
+    train_enc = pd.DataFrame(train_enc, columns=feature_names, index=X_train.index)
+    test_enc  = pd.DataFrame(test_enc, columns=feature_names, index=X_test.index)
+
+    num_cols = ["year", "month", "day_of_week", "hour"]
+
+    X_train_final = pd.concat([X_train[num_cols], train_enc], axis=1)
+    X_test_final  = pd.concat([X_test[num_cols], test_enc], axis=1)
+
+    return X_train_final, X_test_final, y_train, y_test
