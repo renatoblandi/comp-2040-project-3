@@ -439,3 +439,43 @@ def train_evaluate_dt(X_train, X_test, y_train, y_test):
     print("Precision:", round(precision_score(y_test, y_pred), 4))
 
     return dt
+
+def clean_dataset(df):
+    """Apply all cleaning steps to the raw naloxone DataFrame.
+
+    Renames columns to snake_case, drops unnecessary columns, expands
+    dispatch_date into temporal columns, standardizes missing values,
+    creates age_midpoint and is_multiple_dose, and reorders columns.
+
+    Parameters:
+        df: Raw naloxone DataFrame as loaded from the CSV.
+
+    Returns:
+        Cleaned DataFrame ready for analysis.
+    """
+
+    df = df.copy()
+
+    # rename columns to snake_case and fix "naxolone" typo
+    df = df.rename(columns=lambda x: x.replace(" ", "_").lower())
+    df = df.rename(columns={"naxolone_administrations": "naloxone_administrations"})
+
+    # drop columns with low analytical value
+    df = df.drop(columns=["id", "neighbourhood", "neighbourhood_id"])
+
+    # parse dispatch_date and extract temporal columns
+    df = expand_dispatch_date(df)
+
+    # replace "Unknown" strings with real NaN so pandas treats them as missing
+    df[["age", "gender"]] = df[["age", "gender"]].replace("Unknown", np.nan)
+
+    # create numeric age column from age range strings (e.g. "25 to 29" -> 27.0)
+    df["age_midpoint"] = df["age"].apply(age_range_to_midpoint)
+
+    # create boolean flag for severe cases requiring multiple doses
+    df["is_multiple_dose"] = df["naloxone_administrations"].apply(lambda x: x > 1)
+
+    # reorder columns into a more readable layout
+    df = reorder_columns(df)
+
+    return df
