@@ -261,18 +261,37 @@ def plot_income_scatter(df, wards_df):
     # creating new column to hold incidents per 1000 residents
     by_ward["incidents_per_1000"] = (by_ward["incidents"] / by_ward["population"]) * 1000
 
+    # all wards except Point Douglas
+    other_wards = by_ward[by_ward["ward"] != "Point Douglas"]
+    point_douglas = by_ward[by_ward["ward"] == "Point Douglas"]
+
     # plotting
     fig, ax = plt.subplots(figsize=(10, 7))
 
-    ax.scatter(by_ward["median_household_income"], by_ward["incidents_per_1000"],
-            color="steelblue", edgecolor="black", s=120, alpha=0.8)
+    # plotting "other wards" scatter
+    ax.scatter(other_wards["median_household_income"], other_wards["incidents_per_1000"],
+            s=120, color="steelblue", edgecolor="black", alpha=0.85)
 
-    # annotating main wards    
-    main_wards = ["Point Douglas", "Mynarski", "Daniel McIntyre", "Fort Rouge - East Fort Garry"]
+    # plotting "point douglas" scatter (just one point with different color)
+    ax.scatter(point_douglas["median_household_income"], point_douglas["incidents_per_1000"],
+            s=120, color="red", edgecolor="black", alpha=0.85)
+
+    # quadratic trend line
+    coeffs = np.polyfit(by_ward["median_household_income"], by_ward["incidents_per_1000"], 2)
+    x_line = np.linspace(by_ward["median_household_income"].min(), by_ward["median_household_income"].max(), 100)
+    ax.plot(x_line, np.polyval(coeffs, x_line), color="red", linestyle="--", alpha=0.5, label="Quadratic best-fit")
+
+    # annotating the main wards
+    main_wards = ["Mynarski", "Daniel McIntyre", "Fort Rouge - East Fort Garry"]
     main_wards_df = by_ward[by_ward["ward"].isin(main_wards)]
     for _, row in main_wards_df.iterrows():
         ax.annotate(row["ward"], (row["median_household_income"], row["incidents_per_1000"]),
                     fontsize=8, xytext=(5, 4), textcoords="offset points")
+
+    # Point Douglas annotation
+    ax.annotate("Point Douglas\n(concentrates users from\nacross the city)",
+                (point_douglas["median_household_income"].values[0], point_douglas["incidents_per_1000"].values[0]),
+                fontsize=8, xytext=(5, -45), textcoords="offset points")
 
     # labeling the plot
     ax.set_title("Median Household Income vs Incidents per 1,000 Residents", fontsize=16, fontweight="bold")
@@ -281,6 +300,7 @@ def plot_income_scatter(df, wards_df):
 
     # displaying the chart
     ax.grid(alpha=0.4)
+    plt.legend()
     plt.show()
 
 def plot_multiple_dose_heatmap(df):
