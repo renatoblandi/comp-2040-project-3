@@ -1,4 +1,4 @@
-# Winnipeg Naloxone Incidents Analysis
+# Winnipeg Naloxone Administrations Analysis
 
 Final project for COMP-2040 Python Essentials at Red River College Polytech.
 
